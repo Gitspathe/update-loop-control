@@ -101,7 +101,6 @@ public class UpdateManager : MonoBehaviour
         if(!loop.TryGetValue(component.UpdateOrder, out UpdateLoopEntry loopEntry)) {
             loopEntry = new UpdateLoopEntry($"Unnamed ({component.UpdateOrder})", component.UpdateOrder, false);
             AddLoopEntry(loopEntry);
-            return;
         }
         loopEntry.Register(component);
     }
@@ -149,12 +148,12 @@ public class UpdateLoopEntry
     public bool Permanent { get; }
 
     private int count;
-    private HashSet<IFixedUpdate> fixedUpdates = new();
-    private HashSet<IEarlyUpdate> earlyUpdates = new();
-    private HashSet<IUpdate> updates           = new();
-    private HashSet<ILateUpdate> lateUpdates   = new();
-    private HashSet<IGameComponent> toAdd      = new();
-    private HashSet<IGameComponent> toRemove   = new();
+    private HashSet<IFixedUpdate> fixedUpdates = new HashSet<IFixedUpdate>();
+    private HashSet<IEarlyUpdate> earlyUpdates = new HashSet<IEarlyUpdate>();
+    private HashSet<IUpdate> updates           = new HashSet<IUpdate>();
+    private HashSet<ILateUpdate> lateUpdates   = new HashSet<ILateUpdate>();
+    private HashSet<IGameComponent> toAdd      = new HashSet<IGameComponent>();
+    private HashSet<IGameComponent> toRemove   = new HashSet<IGameComponent>();
 
     public bool IsEmpty => count == 0;
     

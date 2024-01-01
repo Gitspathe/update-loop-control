@@ -1,12 +1,12 @@
 # Unnamed tick update manager thingamajig
-This is an game tick manager for Unity. It allows you to bypass some performance costs and inflexibilities imposed by Unity's default update logic architecture. The repo here contains the main scripts, as well as a performance benchmark demo. Please note that the documentation is a work in progress.
+This is a game tick manager for Unity. It allows you to bypass some performance costs and inflexibility imposed by Unity's default update logic architecture. The repo here contains the main scripts, as well as a performance benchmark demo. Please note that the documentation is a work in progress.
 
 ## Features
 ### Current
 - Significantly faster than Unity's built-in update events (in a build, near-empty updates were tested at ~14x faster).
-- Gives control over tick ordering. For example you could process player status before processing the UI.
+- Gives control over tick ordering. For example, you could process player status before processing the UI.
   - Another use case can be for parallel processing. You can use tick ordering to await jobs/threads.
-- Supports arbitary code, not just GameObjects & Components.
+- Supports arbitrary code, not just GameObjects & Components.
 - Implemented as simple interfaces.
 - Easily extendable.
 

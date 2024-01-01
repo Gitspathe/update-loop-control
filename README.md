@@ -23,7 +23,7 @@ This is a game tick manager for Unity. It allows you to bypass some performance 
 ## Tutorial
 To link your logic into the system, inherit from GameComponent and implement one or more update interfaces. The interfaces you can implement are: IEarlyUpdate, IUpdate, ILateUpdate, and IFixedUpdate.
 
-```
+```c#
 public class Jeff : GameComponent, IUpdate
 {
     # Optional - specify the update order. Higher values are called last.
@@ -38,7 +38,7 @@ public class Jeff : GameComponent, IUpdate
 
 If you use OnEnable, OnDisable, or OnDestroy, you need to call the base method!
 
-```
+```c#
 public class Jeff : GameComponent, IUpdate
 {
     public override int UpdateOrder => 100;

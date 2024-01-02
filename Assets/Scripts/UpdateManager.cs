@@ -10,10 +10,11 @@ public class UpdateManager : MonoBehaviour
 
     [SerializeField] private bool removeUnusedEntries;
     [SerializeField] private bool showDebugMessages;
-    
-    public static Action OnInitialized { get; set; }
-    public static bool IsRunning       { get; private set; }
 
+    private static bool isQuitting;
+    
+    public static Action OnInitialized   { get; set; }
+    public static bool IsRunning         { get; private set; }
     public static UpdateManager Instance { get; private set; }
 
     public void Awake()
@@ -26,6 +27,7 @@ public class UpdateManager : MonoBehaviour
         
         DontDestroyOnLoad(gameObject);
         Instance = this;
+        isQuitting = false;
         OnInitialized?.Invoke();
     }
 
@@ -132,11 +134,18 @@ public class UpdateManager : MonoBehaviour
     
     private static bool EnsureInitialization()
     {
+        if(isQuitting || !Application.isPlaying)
+            return false;
         if(Instance != null)
             return true;
         
         Debug.LogError("UpdateManager is not initialized!");
         return false;
+    }
+
+    private void OnApplicationQuit()
+    {
+        isQuitting = true;
     }
 }
 

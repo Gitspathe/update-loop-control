@@ -7,7 +7,7 @@ public abstract class UpdateTaskBase : ILoopUpdateable
 {
     protected Action Action;
         
-    public int UpdateOrder         { get; protected set; }
+    public int UpdateOrder         { get; }
     public bool IsValidForUpdating { get; set; }
 
     protected UpdateTaskBase(Action action, int updateOrder)

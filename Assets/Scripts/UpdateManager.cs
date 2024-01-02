@@ -90,7 +90,7 @@ public class UpdateManager : MonoBehaviour
             return;
         
         if(Instance.loop.ContainsKey(entry.Order)) {
-            Debug.LogError($"Tried to add update entry '{entry.Name}', but an entry at order {entry.Order} already exists.");
+            Debug.LogError($"Tried to add update loop entry '{entry.Name}', but an entry at order {entry.Order} already exists.");
             return;
         }
         Instance.loop.Add(entry.Order, entry);
@@ -106,28 +106,28 @@ public class UpdateManager : MonoBehaviour
         }
     }
 
-    public static void Register(IGameComponent component)
+    public static void Register(ILoopUpdateable updateable)
     {
         if(!EnsureInitialization())
             return;
         
-        if(!Instance.loop.TryGetValue(component.UpdateOrder, out UpdateLoopEntry loopEntry)) {
-            loopEntry = new UpdateLoopEntry($"Unnamed ({component.UpdateOrder})", component.UpdateOrder, false);
+        if(!Instance.loop.TryGetValue(updateable.UpdateOrder, out UpdateLoopEntry loopEntry)) {
+            loopEntry = new UpdateLoopEntry($"Unnamed ({updateable.UpdateOrder})", updateable.UpdateOrder, false);
             AddLoopEntry(loopEntry);
         }
-        loopEntry.Register(component);
+        loopEntry.Register(updateable);
     }
 
-    public static void Unregister(IGameComponent component)
+    public static void Unregister(ILoopUpdateable updateable)
     {
         if(!EnsureInitialization())
             return;
         
-        if(!Instance.loop.TryGetValue(component.UpdateOrder, out UpdateLoopEntry loopEntry)) {
-            Debug.LogError($"Failed to unregister component: no update loop at position {component.UpdateOrder} found.");
+        if(!Instance.loop.TryGetValue(updateable.UpdateOrder, out UpdateLoopEntry loopEntry)) {
+            Debug.LogError($"Failed to unregister updateable: no update loop entry at position {updateable.UpdateOrder}.");
             return;
         }
-        loopEntry.Unregister(component);
+        loopEntry.Unregister(updateable);
     }
     
     private static bool EnsureInitialization()
@@ -140,28 +140,28 @@ public class UpdateManager : MonoBehaviour
     }
 }
 
-public interface IGameComponent
+public interface ILoopUpdateable
 {
     int UpdateOrder         { get; }
     bool IsValidForUpdating { get; set; }
 }
 
-public interface IFixedUpdate : IGameComponent
+public interface IFixedUpdate : ILoopUpdateable
 {
     void GameFixedUpdate();
 }
 
-public interface IEarlyUpdate : IGameComponent
+public interface IEarlyUpdate : ILoopUpdateable
 {
     void GameEarlyUpdate();
 }
 
-public interface IUpdate : IGameComponent
+public interface IUpdate : ILoopUpdateable
 {
     void GameUpdate();
 }
 
-public interface ILateUpdate : IGameComponent
+public interface ILateUpdate : ILoopUpdateable
 {
     void GameLateUpdate();
 }
@@ -177,8 +177,8 @@ public class UpdateLoopEntry
     private HashSet<IEarlyUpdate> earlyUpdates = new HashSet<IEarlyUpdate>();
     private HashSet<IUpdate> updates           = new HashSet<IUpdate>();
     private HashSet<ILateUpdate> lateUpdates   = new HashSet<ILateUpdate>();
-    private HashSet<IGameComponent> toAdd      = new HashSet<IGameComponent>();
-    private HashSet<IGameComponent> toRemove   = new HashSet<IGameComponent>();
+    private HashSet<ILoopUpdateable> toAdd     = new HashSet<ILoopUpdateable>();
+    private HashSet<ILoopUpdateable> toRemove  = new HashSet<ILoopUpdateable>();
 
     public bool IsEmpty => count == 0;
     
@@ -229,68 +229,68 @@ public class UpdateLoopEntry
         }
     }
 
-    public void Register(IGameComponent gameComponent)
+    public void Register(ILoopUpdateable updateable)
     {
         count++;
-        gameComponent.IsValidForUpdating = true;
+        updateable.IsValidForUpdating = true;
         if(UpdateManager.IsRunning) {
-            toAdd.Add(gameComponent);
+            toAdd.Add(updateable);
         } else {
-            RegisterInternal(gameComponent);
+            RegisterInternal(updateable);
         }
     }
 
-    public void Unregister(IGameComponent gameComponent)
+    public void Unregister(ILoopUpdateable updateable)
     {
         count--;
-        gameComponent.IsValidForUpdating = false;
+        updateable.IsValidForUpdating = false;
         if(UpdateManager.IsRunning) {
-            toRemove.Add(gameComponent);
+            toRemove.Add(updateable);
         } else {
-            UnregisterInternal(gameComponent);
+            UnregisterInternal(updateable);
         }
     }
 
     public void CleanUp()
     {
-        foreach(IGameComponent component in toAdd) {
-            RegisterInternal(component);
+        foreach(ILoopUpdateable updateable in toAdd) {
+            RegisterInternal(updateable);
         }
-        foreach(IGameComponent component in toRemove) {
-            UnregisterInternal(component);
+        foreach(ILoopUpdateable updateable in toRemove) {
+            UnregisterInternal(updateable);
         }
         toAdd.Clear();
         toRemove.Clear();
     }
 
-    private void UnregisterInternal(IGameComponent component)
+    private void UnregisterInternal(ILoopUpdateable updateable)
     {
-        if(component is IFixedUpdate fixedUpdate) {
+        if(updateable is IFixedUpdate fixedUpdate) {
             fixedUpdates.Remove(fixedUpdate);
         }
-        if(component is IEarlyUpdate earlyUpdate) {
+        if(updateable is IEarlyUpdate earlyUpdate) {
             earlyUpdates.Remove(earlyUpdate);
         }
-        if(component is IUpdate update) {
+        if(updateable is IUpdate update) {
             updates.Remove(update);
         }
-        if(component is ILateUpdate lateUpdate) {
+        if(updateable is ILateUpdate lateUpdate) {
             lateUpdates.Remove(lateUpdate);
         }
     }
 
-    private void RegisterInternal(IGameComponent component)
+    private void RegisterInternal(ILoopUpdateable updateable)
     {
-        if(component is IFixedUpdate fixedUpdate) {
+        if(updateable is IFixedUpdate fixedUpdate) {
             fixedUpdates.Add(fixedUpdate);
         }
-        if(component is IEarlyUpdate earlyUpdate) {
+        if(updateable is IEarlyUpdate earlyUpdate) {
             earlyUpdates.Add(earlyUpdate);
         }
-        if(component is IUpdate update) {
+        if(updateable is IUpdate update) {
             updates.Add(update);
         }
-        if(component is ILateUpdate lateUpdate) {
+        if(updateable is ILateUpdate lateUpdate) {
             lateUpdates.Add(lateUpdate);
         }
     }

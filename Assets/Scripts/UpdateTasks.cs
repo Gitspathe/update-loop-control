@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class UpdateTaskBase : IGameComponent
+public abstract class UpdateTaskBase : ILoopUpdateable
 {
     protected Action Action;
         

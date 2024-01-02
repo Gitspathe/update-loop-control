@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
     
-public abstract class GameComponent : MonoBehaviour, IGameComponent
+public abstract class LoopComponent : MonoBehaviour, ILoopUpdateable
 {
     public virtual int UpdateOrder => 0;
     public bool IsValidForUpdating { get; set; }

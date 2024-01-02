@@ -15,16 +15,16 @@ This is a game tick manager for Unity. It allows you to bypass some performance 
 - Debugging tools.
 
 ## Setup
-- Move GameComponent.cs & UpdateManager.cs to your project.
+- Move LoopComponent.cs & UpdateManager.cs to your project.
 - <b>IMPORTANT!</b> You need to modify the script execution order so that UpdateManager runs before your scripts.
   - Edit -> Project Settings -> Script Execution Order -> (add UpdateManager and drag it above Default Time)
 - Attach UpdateManager to a new empty GameObject in your first loaded scene. Now it's good to go!
 
 ## Tutorial
-To link your logic into the system, inherit from GameComponent and implement one or more update interfaces. The interfaces you can implement are: IEarlyUpdate, IUpdate, ILateUpdate, and IFixedUpdate.
+To link your logic into the system, inherit from LoopComponent and implement one or more update interfaces. The interfaces you can implement are: IEarlyUpdate, IUpdate, ILateUpdate, and IFixedUpdate.
 
 ```c#
-public class Jeff : GameComponent, IUpdate
+public class Jeff : LoopComponent, IUpdate
 {
     # Optional - specify the update order. Higher values are called last.
     public override int UpdateOrder => 100;
@@ -39,7 +39,7 @@ public class Jeff : GameComponent, IUpdate
 If you use OnEnable, OnDisable, or OnDestroy, you need to call the base method!
 
 ```c#
-public class Jeff : GameComponent, IUpdate
+public class Jeff : LoopComponent, IUpdate
 {
     public override int UpdateOrder => 100;
 

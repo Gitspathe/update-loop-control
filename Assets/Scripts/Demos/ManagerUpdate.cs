@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ManagerUpdate : GameComponent, IUpdate
+public class ManagerUpdate : LoopComponent, IUpdate
 {
     public static int Counter;
     

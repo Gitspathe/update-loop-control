@@ -10,16 +10,16 @@ public abstract class GameComponent : MonoBehaviour, IGameComponent
 
     protected virtual void OnEnable()
     {
-        UpdateManager.Instance.Register(this);
+        UpdateManager.Register(this);
     }
 
     protected virtual void OnDisable()
     {
-        UpdateManager.Instance.Unregister(this);
+        UpdateManager.Unregister(this);
     }
 
     protected virtual void OnDestroy()
     {
-        UpdateManager.Instance.Unregister(this);
+        UpdateManager.Unregister(this);
     }
 }

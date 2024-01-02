@@ -12,7 +12,7 @@ public class UpdateManagerInit : MonoBehaviour
 
     private void Register()
     {
-        UpdateManager.Instance.AddLoopEntries(
+        UpdateManager.AddLoopEntries(
             new UpdateLoopEntry("Default",            GameUpdateOrder.Default),
             new UpdateLoopEntry("AI Preprocessing",   GameUpdateOrder.AIPreprocessing),
             new UpdateLoopEntry("AI Processing",      GameUpdateOrder.AIProcessing),

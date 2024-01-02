@@ -11,12 +11,19 @@ public class UpdateManager : MonoBehaviour
     [SerializeField] private bool removeUnusedEntries;
     [SerializeField] private bool showDebugMessages;
     
-    public static Action OnInitialized   { get; set; }
-    public static bool IsRunning         { get; private set; }
+    public static Action OnInitialized { get; set; }
+    public static bool IsRunning       { get; private set; }
+
     public static UpdateManager Instance { get; private set; }
 
     public void Awake()
     {
+        if(Instance != null) {
+            Debug.Log($"UpdateManager singleton already exists. Destroying new instance.");
+            Destroy(gameObject);
+            return;
+        }
+        
         DontDestroyOnLoad(gameObject);
         Instance = this;
         OnInitialized?.Invoke();
@@ -77,41 +84,59 @@ public class UpdateManager : MonoBehaviour
         entriesToRemove.Clear();
     }
 
-    public void AddLoopEntry(UpdateLoopEntry entry)
+    public static void AddLoopEntry(UpdateLoopEntry entry)
     {
-        if(loop.ContainsKey(entry.Order)) {
+        if(!EnsureInitialization())
+            return;
+        
+        if(Instance.loop.ContainsKey(entry.Order)) {
             Debug.LogError($"Tried to add update entry '{entry.Name}', but an entry at order {entry.Order} already exists.");
             return;
         }
-        loop.Add(entry.Order, entry);
-        if(showDebugMessages) {
+        Instance.loop.Add(entry.Order, entry);
+        if(Instance.showDebugMessages) {
             Debug.Log($"Registered update loop entry with order {entry.Order}, Name: {entry.Name}");
         }
     }
 
-    public void AddLoopEntries(params UpdateLoopEntry[] entries)
+    public static void AddLoopEntries(params UpdateLoopEntry[] entries)
     {
         foreach(UpdateLoopEntry entry in entries) {
             AddLoopEntry(entry);
         }
     }
 
-    public void Register(IGameComponent component)
+    public static void Register(IGameComponent component)
     {
-        if(!loop.TryGetValue(component.UpdateOrder, out UpdateLoopEntry loopEntry)) {
+        if(!EnsureInitialization())
+            return;
+        
+        if(!Instance.loop.TryGetValue(component.UpdateOrder, out UpdateLoopEntry loopEntry)) {
             loopEntry = new UpdateLoopEntry($"Unnamed ({component.UpdateOrder})", component.UpdateOrder, false);
             AddLoopEntry(loopEntry);
         }
         loopEntry.Register(component);
     }
 
-    public void Unregister(IGameComponent component)
+    public static void Unregister(IGameComponent component)
     {
-        if(!loop.TryGetValue(component.UpdateOrder, out UpdateLoopEntry loopEntry)) {
+        if(!EnsureInitialization())
+            return;
+        
+        if(!Instance.loop.TryGetValue(component.UpdateOrder, out UpdateLoopEntry loopEntry)) {
             Debug.LogError($"Failed to unregister component: no update loop at position {component.UpdateOrder} found.");
             return;
         }
         loopEntry.Unregister(component);
+    }
+    
+    private static bool EnsureInitialization()
+    {
+        if(Instance != null)
+            return true;
+        
+        Debug.LogError("UpdateManager is not initialized!");
+        return false;
     }
 }
 

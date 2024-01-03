@@ -27,26 +27,26 @@ public abstract class UpdateTaskBase : ILoopUpdateable
     }
 }
 
-public class FixedUpdateTask : UpdateTaskBase, IFixedUpdate
+public class FixedUpdateTask : UpdateTaskBase, ILoopFixedUpdate
 {
     public FixedUpdateTask(Action onFixedUpdate, int updateOrder = 0) : base(onFixedUpdate, updateOrder) { }
-    public void GameFixedUpdate() => Action.Invoke();
+    public void LoopFixedUpdate() => Action.Invoke();
 }
     
-public class EarlyUpdateTask : UpdateTaskBase, IEarlyUpdate
+public class EarlyUpdateTask : UpdateTaskBase, ILoopEarlyUpdate
 {
     public EarlyUpdateTask(Action onEarlyUpdate, int updateOrder = 0) : base(onEarlyUpdate, updateOrder) { }
-    public void GameEarlyUpdate() => Action.Invoke();
+    public void LoopEarlyUpdate() => Action.Invoke();
 }
     
-public class UpdateTask : UpdateTaskBase, IUpdate
+public class UpdateTask : UpdateTaskBase, ILoopUpdate
 {
     public UpdateTask(Action onUpdate, int updateOrder = 0) : base(onUpdate, updateOrder) { }
-    public void GameUpdate() => Action.Invoke();
+    public void LoopUpdate() => Action.Invoke();
 }
     
-public class LateUpdateTask : UpdateTaskBase, ILateUpdate
+public class LateUpdateTask : UpdateTaskBase, ILoopLateUpdate
 {
     public LateUpdateTask(Action onLateUpdate, int updateOrder = 0) : base(onLateUpdate, updateOrder) { }
-    public void GameLateUpdate() => Action.Invoke();
+    public void LoopLateUpdate() => Action.Invoke();
 }

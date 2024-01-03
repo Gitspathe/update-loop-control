@@ -21,29 +21,29 @@ This is a game tick manager for Unity. It allows you to bypass some performance 
 - Attach UpdateManager to a new empty GameObject in your first loaded scene. Now it's good to go!
 
 ## Tutorial
-To link your logic into the system, inherit from LoopComponent and implement one or more update interfaces. The interfaces you can implement are: IEarlyUpdate, IUpdate, ILateUpdate, and IFixedUpdate.
+To link your logic into the system, inherit from LoopComponent and implement one or more update interfaces. The interfaces you can implement are: ILoopEarlyUpdate, ILoopUpdate, ILoopLateUpdate, and ILoopFixedUpdate.
 
 ```c#
-public class Jeff : LoopComponent, IUpdate
+public class Jeff : LoopComponent, ILoopUpdate
 {
     # Optional - specify the update order. Higher values are called last.
     public override int UpdateOrder => 100;
 
-    public void GameUpdate()
+    public void LoopUpdate()
     {
         DoCoolStuff();
     }
 }
 ```
 
-If you use OnEnable, OnDisable, or OnDestroy, you need to call the base method!
+If you use OnEnable or OnDisable, you need to call the base method!
 
 ```c#
-public class Jeff : LoopComponent, IUpdate
+public class Jeff : LoopComponent, ILoopUpdate
 {
     public override int UpdateOrder => 100;
 
-    public void GameUpdate()
+    public void LoopUpdate()
     {
         DoCoolStuff();
     }
@@ -58,12 +58,6 @@ public class Jeff : LoopComponent, IUpdate
     {
         base.OnDisable();
         Die();
-    }
-
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-        InstallGentoo();
     }
 }
 ```

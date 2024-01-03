@@ -17,9 +17,4 @@ public abstract class LoopComponent : MonoBehaviour, ILoopUpdateable
     {
         UpdateManager.Unregister(this);
     }
-
-    protected virtual void OnDestroy()
-    {
-        UpdateManager.Unregister(this);
-    }
 }

@@ -155,24 +155,24 @@ public interface ILoopUpdateable
     bool IsValidForUpdating { get; set; }
 }
 
-public interface IFixedUpdate : ILoopUpdateable
+public interface ILoopFixedUpdate : ILoopUpdateable
 {
-    void GameFixedUpdate();
+    void LoopFixedUpdate();
 }
 
-public interface IEarlyUpdate : ILoopUpdateable
+public interface ILoopEarlyUpdate : ILoopUpdateable
 {
-    void GameEarlyUpdate();
+    void LoopEarlyUpdate();
 }
 
-public interface IUpdate : ILoopUpdateable
+public interface ILoopUpdate : ILoopUpdateable
 {
-    void GameUpdate();
+    void LoopUpdate();
 }
 
-public interface ILateUpdate : ILoopUpdateable
+public interface ILoopLateUpdate : ILoopUpdateable
 {
-    void GameLateUpdate();
+    void LoopLateUpdate();
 }
 
 public class UpdateLoopEntry
@@ -182,10 +182,10 @@ public class UpdateLoopEntry
     public bool Permanent { get; }
 
     private int count;
-    private HashSet<IFixedUpdate> fixedUpdates = new HashSet<IFixedUpdate>();
-    private HashSet<IEarlyUpdate> earlyUpdates = new HashSet<IEarlyUpdate>();
-    private HashSet<IUpdate> updates           = new HashSet<IUpdate>();
-    private HashSet<ILateUpdate> lateUpdates   = new HashSet<ILateUpdate>();
+    private HashSet<ILoopFixedUpdate> fixedUpdates = new HashSet<ILoopFixedUpdate>();
+    private HashSet<ILoopEarlyUpdate> earlyUpdates = new HashSet<ILoopEarlyUpdate>();
+    private HashSet<ILoopUpdate> updates           = new HashSet<ILoopUpdate>();
+    private HashSet<ILoopLateUpdate> lateUpdates   = new HashSet<ILoopLateUpdate>();
     private HashSet<ILoopUpdateable> toAdd     = new HashSet<ILoopUpdateable>();
     private HashSet<ILoopUpdateable> toRemove  = new HashSet<ILoopUpdateable>();
 
@@ -200,41 +200,41 @@ public class UpdateLoopEntry
 
     public void ExecuteFixedUpdate()
     {
-        foreach(IFixedUpdate update in fixedUpdates) {
+        foreach(ILoopFixedUpdate update in fixedUpdates) {
             if(!update.IsValidForUpdating)
                 continue;
             
-            update.GameFixedUpdate();
+            update.LoopFixedUpdate();
         }
     }
 
     public void ExecuteEarlyUpdate()
     {
-        foreach(IEarlyUpdate update in earlyUpdates) {
+        foreach(ILoopEarlyUpdate update in earlyUpdates) {
             if(!update.IsValidForUpdating)
                 continue;
             
-            update.GameEarlyUpdate();
+            update.LoopEarlyUpdate();
         }
     }
     
     public void ExecuteUpdate()
     {
-        foreach(IUpdate update in updates) {
+        foreach(ILoopUpdate update in updates) {
             if(!update.IsValidForUpdating)
                 continue;
             
-            update.GameUpdate();
+            update.LoopUpdate();
         }
     }
     
     public void ExecuteLateUpdate()
     {
-        foreach(ILateUpdate update in lateUpdates) {
+        foreach(ILoopLateUpdate update in lateUpdates) {
             if(!update.IsValidForUpdating)
                 continue;
             
-            update.GameLateUpdate();
+            update.LoopLateUpdate();
         }
     }
 
@@ -254,6 +254,7 @@ public class UpdateLoopEntry
         count--;
         updateable.IsValidForUpdating = false;
         if(UpdateManager.IsRunning) {
+            toAdd.Remove(updateable);
             toRemove.Add(updateable);
         } else {
             UnregisterInternal(updateable);
@@ -262,11 +263,11 @@ public class UpdateLoopEntry
 
     public void CleanUp()
     {
-        foreach(ILoopUpdateable updateable in toAdd) {
-            RegisterInternal(updateable);
-        }
         foreach(ILoopUpdateable updateable in toRemove) {
             UnregisterInternal(updateable);
+        }
+        foreach(ILoopUpdateable updateable in toAdd) {
+            RegisterInternal(updateable);
         }
         toAdd.Clear();
         toRemove.Clear();
@@ -274,32 +275,32 @@ public class UpdateLoopEntry
 
     private void UnregisterInternal(ILoopUpdateable updateable)
     {
-        if(updateable is IFixedUpdate fixedUpdate) {
+        if(updateable is ILoopFixedUpdate fixedUpdate) {
             fixedUpdates.Remove(fixedUpdate);
         }
-        if(updateable is IEarlyUpdate earlyUpdate) {
+        if(updateable is ILoopEarlyUpdate earlyUpdate) {
             earlyUpdates.Remove(earlyUpdate);
         }
-        if(updateable is IUpdate update) {
+        if(updateable is ILoopUpdate update) {
             updates.Remove(update);
         }
-        if(updateable is ILateUpdate lateUpdate) {
+        if(updateable is ILoopLateUpdate lateUpdate) {
             lateUpdates.Remove(lateUpdate);
         }
     }
 
     private void RegisterInternal(ILoopUpdateable updateable)
     {
-        if(updateable is IFixedUpdate fixedUpdate) {
+        if(updateable is ILoopFixedUpdate fixedUpdate) {
             fixedUpdates.Add(fixedUpdate);
         }
-        if(updateable is IEarlyUpdate earlyUpdate) {
+        if(updateable is ILoopEarlyUpdate earlyUpdate) {
             earlyUpdates.Add(earlyUpdate);
         }
-        if(updateable is IUpdate update) {
+        if(updateable is ILoopUpdate update) {
             updates.Add(update);
         }
-        if(updateable is ILateUpdate lateUpdate) {
+        if(updateable is ILoopLateUpdate lateUpdate) {
             lateUpdates.Add(lateUpdate);
         }
     }

@@ -186,8 +186,8 @@ public class UpdateLoopEntry
     private HashSet<ILoopEarlyUpdate> earlyUpdates = new HashSet<ILoopEarlyUpdate>();
     private HashSet<ILoopUpdate> updates           = new HashSet<ILoopUpdate>();
     private HashSet<ILoopLateUpdate> lateUpdates   = new HashSet<ILoopLateUpdate>();
-    private HashSet<ILoopUpdateable> toAdd     = new HashSet<ILoopUpdateable>();
-    private HashSet<ILoopUpdateable> toRemove  = new HashSet<ILoopUpdateable>();
+    private HashSet<ILoopUpdateable> toAdd         = new HashSet<ILoopUpdateable>();
+    private HashSet<ILoopUpdateable> toRemove      = new HashSet<ILoopUpdateable>();
 
     public bool IsEmpty => count == 0;
     

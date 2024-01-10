@@ -40,11 +40,7 @@ public class UpdateManager : MonoBehaviour
     {
         IsRunning = true;
         foreach(UpdateLoopEntry entry in loop) {
-            try {
-                entry.ExecuteFixedUpdate();
-            } catch(Exception e) {
-                Debug.Log(e);
-            }
+            entry.ExecuteFixedUpdate();
         }
     }
 
@@ -52,36 +48,20 @@ public class UpdateManager : MonoBehaviour
     {
         IsRunning = true;
         foreach(UpdateLoopEntry entry in loop) {
-            try {
-                entry.ExecuteEarlyUpdate();
-            } catch(Exception e) {
-                Debug.Log(e);
-            }
+            entry.ExecuteEarlyUpdate();
         }
         foreach(UpdateLoopEntry entry in loop) {
-            try {
-                entry.ExecuteUpdate();
-            } catch(Exception e) {
-                Debug.Log(e);
-            }
+            entry.ExecuteUpdate();
         }
     }
 
     private void LateUpdate()
     {
         foreach(UpdateLoopEntry entry in loop) {
-            try {
-                entry.ExecuteLateUpdate();
-            } catch(Exception e) {
-                Debug.Log(e);
-            }
+            entry.ExecuteLateUpdate();
         }
         foreach(UpdateLoopEntry entry in loop) {
-            try {
-                entry.CleanUp();
-            } catch(Exception e) {
-                Debug.Log(e);
-            }
+            entry.CleanUp();
         }
         if(removeUnusedEntries) {
             PruneUnused();
@@ -230,8 +210,12 @@ public class UpdateLoopEntry
         foreach(ILoopFixedUpdate update in fixedUpdates) {
             if(!update.IsValidForUpdating)
                 continue;
-            
-            update.LoopFixedUpdate();
+
+            try {
+                update.LoopFixedUpdate();
+            } catch(Exception e) {
+                Debug.LogError(e);
+            }
         }
     }
 
@@ -240,8 +224,12 @@ public class UpdateLoopEntry
         foreach(ILoopEarlyUpdate update in earlyUpdates) {
             if(!update.IsValidForUpdating)
                 continue;
-            
-            update.LoopEarlyUpdate();
+
+            try {
+                update.LoopEarlyUpdate();
+            } catch(Exception e) {
+                Debug.LogError(e);
+            }
         }
     }
     
@@ -251,7 +239,11 @@ public class UpdateLoopEntry
             if(!update.IsValidForUpdating)
                 continue;
             
-            update.LoopUpdate();
+            try {
+                update.LoopUpdate();
+            } catch(Exception e) {
+                Debug.LogError(e);
+            }
         }
     }
     
@@ -261,7 +253,11 @@ public class UpdateLoopEntry
             if(!update.IsValidForUpdating)
                 continue;
             
-            update.LoopLateUpdate();
+            try {
+                update.LoopLateUpdate();
+            } catch(Exception e) {
+                Debug.LogError(e);
+            }
         }
     }
 

@@ -40,7 +40,11 @@ public class UpdateManager : MonoBehaviour
     {
         IsRunning = true;
         foreach(UpdateLoopEntry entry in loop) {
-            entry.ExecuteFixedUpdate();
+            try {
+                entry.ExecuteFixedUpdate();
+            } catch(Exception e) {
+                Debug.Log(e);
+            }
         }
     }
 
@@ -48,20 +52,36 @@ public class UpdateManager : MonoBehaviour
     {
         IsRunning = true;
         foreach(UpdateLoopEntry entry in loop) {
-            entry.ExecuteEarlyUpdate();
+            try {
+                entry.ExecuteEarlyUpdate();
+            } catch(Exception e) {
+                Debug.Log(e);
+            }
         }
         foreach(UpdateLoopEntry entry in loop) {
-            entry.ExecuteUpdate();
+            try {
+                entry.ExecuteUpdate();
+            } catch(Exception e) {
+                Debug.Log(e);
+            }
         }
     }
 
     private void LateUpdate()
     {
         foreach(UpdateLoopEntry entry in loop) {
-            entry.ExecuteLateUpdate();
+            try {
+                entry.ExecuteLateUpdate();
+            } catch(Exception e) {
+                Debug.Log(e);
+            }
         }
         foreach(UpdateLoopEntry entry in loop) {
-            entry.CleanUp();
+            try {
+                entry.CleanUp();
+            } catch(Exception e) {
+                Debug.Log(e);
+            }
         }
         if(removeUnusedEntries) {
             PruneUnused();

@@ -5,16 +5,16 @@ using UnityEngine;
 
 public class UpdateManager : MonoBehaviour
 {
-    private SortedDictionary<int, UpdateLoopEntry> loop = new SortedDictionary<int, UpdateLoopEntry>();
-    private List<int> entriesToRemove                   = new List<int>();
+    private List<UpdateLoopEntry> loop              = new List<UpdateLoopEntry>();
+    private List<UpdateLoopEntry> entriesToRemove   = new List<UpdateLoopEntry>();
+    private Dictionary<int, UpdateLoopEntry> lookup = new Dictionary<int, UpdateLoopEntry>();
 
     [SerializeField] private bool removeUnusedEntries;
     [SerializeField] private bool showDebugMessages;
-
-    private static bool isQuitting;
     
     public static Action OnInitialized   { get; set; }
     public static bool IsRunning         { get; private set; }
+    public static bool IsQuitting        { get; private set; }
     public static UpdateManager Instance { get; private set; }
 
     public void Awake()
@@ -27,7 +27,7 @@ public class UpdateManager : MonoBehaviour
         
         DontDestroyOnLoad(gameObject);
         Instance = this;
-        isQuitting = false;
+        IsQuitting = false;
         OnInitialized?.Invoke();
     }
 
@@ -39,7 +39,7 @@ public class UpdateManager : MonoBehaviour
     private void FixedUpdate()
     {
         IsRunning = true;
-        foreach(UpdateLoopEntry entry in loop.Values) {
+        foreach(UpdateLoopEntry entry in loop) {
             entry.ExecuteFixedUpdate();
         }
     }
@@ -47,20 +47,20 @@ public class UpdateManager : MonoBehaviour
     private void Update()
     {
         IsRunning = true;
-        foreach(UpdateLoopEntry entry in loop.Values) {
+        foreach(UpdateLoopEntry entry in loop) {
             entry.ExecuteEarlyUpdate();
         }
-        foreach(UpdateLoopEntry entry in loop.Values) {
+        foreach(UpdateLoopEntry entry in loop) {
             entry.ExecuteUpdate();
         }
     }
 
     private void LateUpdate()
     {
-        foreach(UpdateLoopEntry entry in loop.Values) {
+        foreach(UpdateLoopEntry entry in loop) {
             entry.ExecuteLateUpdate();
         }
-        foreach(UpdateLoopEntry entry in loop.Values) {
+        foreach(UpdateLoopEntry entry in loop) {
             entry.CleanUp();
         }
         if(removeUnusedEntries) {
@@ -71,16 +71,16 @@ public class UpdateManager : MonoBehaviour
 
     private void PruneUnused()
     {
-        foreach(UpdateLoopEntry entry in loop.Values) {
+        foreach(UpdateLoopEntry entry in loop) {
             if(entry.Permanent || !entry.IsEmpty)
                 continue;
             
-            entriesToRemove.Add(entry.Order);
+            entriesToRemove.Add(entry);
             if(showDebugMessages) {
                 Debug.Log($"Pruning unused update loop entry with order {entry.Order}, Name: {entry.Name}");
             }
         }
-        foreach(int i in entriesToRemove) {
+        foreach(UpdateLoopEntry i in entriesToRemove) {
             loop.Remove(i);
         }
         entriesToRemove.Clear();
@@ -91,11 +91,13 @@ public class UpdateManager : MonoBehaviour
         if(!EnsureInitialization())
             return;
         
-        if(Instance.loop.ContainsKey(entry.Order)) {
+        if(Instance.lookup.ContainsKey(entry.Order)) {
             Debug.LogError($"Tried to add update loop entry '{entry.Name}', but an entry at order {entry.Order} already exists.");
             return;
         }
-        Instance.loop.Add(entry.Order, entry);
+        Instance.loop.Add(entry);
+        Instance.lookup.Add(entry.Order, entry);
+        Sort();
         if(Instance.showDebugMessages) {
             Debug.Log($"Registered update loop entry with order {entry.Order}, Name: {entry.Name}");
         }
@@ -112,8 +114,8 @@ public class UpdateManager : MonoBehaviour
     {
         if(!EnsureInitialization())
             return;
-        
-        if(!Instance.loop.TryGetValue(updateable.UpdateOrder, out UpdateLoopEntry loopEntry)) {
+
+        if(!Instance.lookup.TryGetValue(updateable.UpdateOrder, out UpdateLoopEntry loopEntry)) {
             loopEntry = new UpdateLoopEntry($"Unnamed ({updateable.UpdateOrder})", updateable.UpdateOrder, false);
             AddLoopEntry(loopEntry);
         }
@@ -125,16 +127,21 @@ public class UpdateManager : MonoBehaviour
         if(!EnsureInitialization())
             return;
         
-        if(!Instance.loop.TryGetValue(updateable.UpdateOrder, out UpdateLoopEntry loopEntry)) {
+        if(!Instance.lookup.TryGetValue(updateable.UpdateOrder, out UpdateLoopEntry loopEntry)) {
             Debug.LogError($"Failed to unregister updateable: no update loop entry at position {updateable.UpdateOrder}.");
             return;
         }
         loopEntry.Unregister(updateable);
     }
+
+    private static void Sort()
+    {
+        Instance.loop.Sort(new UpdateLoopEntry.Comparer());
+    }
     
     private static bool EnsureInitialization()
     {
-        if(isQuitting || !Application.isPlaying)
+        if(IsQuitting || !Application.isPlaying)
             return false;
         if(Instance != null)
             return true;
@@ -145,7 +152,7 @@ public class UpdateManager : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        isQuitting = true;
+        IsQuitting = true;
     }
 }
 
@@ -308,5 +315,13 @@ public class UpdateLoopEntry
     public override int GetHashCode()
     {
         return Order;
+    }
+    
+    public struct Comparer : IComparer<UpdateLoopEntry>
+    {
+        public int Compare(UpdateLoopEntry x, UpdateLoopEntry y)
+        {
+            return x.Order.CompareTo(y.Order);
+        }
     }
 }
